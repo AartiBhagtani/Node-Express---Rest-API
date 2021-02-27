@@ -35,7 +35,7 @@ app.use('/images', express.static(path.join(__dirname, 'images')));
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
+  res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET, POST, PUT, PATCH, DELETE');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   next();
 });
@@ -53,6 +53,12 @@ app.use((error, req, res, next) => {
 
 mongoose.connect(process.env.MONGODB_CONNECTION_STRING, {useUnifiedTopology: true, useNewUrlParser: true})
 .then(result => {
-  app.listen(8080);
+  const server = app.listen(8080);
+  // socket io object
+  const io = require('./socket').init(server);  // event listeners - on : wait for new connection
+  io.on('connection', socket => {
+    // this can handles requests from multiple clients.
+    console.log('Client connected')
+  })
 })
 .catch(err => console.log(err))
